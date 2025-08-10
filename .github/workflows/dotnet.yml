@@ -1,4 +1,4 @@
-name: .NET Build and Deploy
+name: CI with Simulated CD and Secrets Demo
 
 on:
   push:
@@ -6,23 +6,43 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-simulate-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 9.0.x
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build project
-      run: dotnet build --no-restore --configuration Release
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
 
-    - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
+
+      - name: Simulate deployment step
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "=============================="
+          echo "Simulación de despliegue (CD)"
+          if [ -z "$API_KEY" ]; then
+            echo "No hay API_KEY configurado"
+          else
+            echo "API_KEY está configurado"
+          fi
+          if [ -z "$SSH_PRIVATE_KEY" ]; then
+            echo "No hay SSH_PRIVATE_KEY configurado"
+          else
+            echo "SSH_PRIVATE_KEY está configurado"
+          fi
+          echo "Aquí iría el paso real de deploy"
+          echo "=============================="
